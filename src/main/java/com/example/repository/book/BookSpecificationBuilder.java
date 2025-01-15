@@ -4,6 +4,7 @@ import com.example.dto.BookSearchParametersDto;
 import com.example.model.Book;
 import com.example.repository.SpecificationBuilder;
 import com.example.repository.SpecificationProviderManager;
+import com.example.util.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -12,9 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
 
-    private static final String AUTHOR = "author";
-    private static final String TITLE = "title";
-
     private final SpecificationProviderManager<Book> bookSpecificationProviderManager;
 
     @Override
@@ -22,12 +20,14 @@ public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
         Specification<Book> spec = Specification.where(null);
         if (bookSearchParametersDto.getAuthor() != null
                 && bookSearchParametersDto.getAuthor().length > 0) {
-            spec = spec.and(bookSpecificationProviderManager.getSpecificationProvider(AUTHOR)
+            spec = spec.and(bookSpecificationProviderManager
+                    .getSpecificationProvider(Constants.AUTHOR)
                     .getSpecification(bookSearchParametersDto.getAuthor()));
         }
         if (bookSearchParametersDto.getTitle() != null
                 && bookSearchParametersDto.getTitle().length > 0) {
-            spec = spec.and(bookSpecificationProviderManager.getSpecificationProvider(TITLE)
+            spec = spec.and(bookSpecificationProviderManager
+                    .getSpecificationProvider(Constants.TITLE)
                     .getSpecification(bookSearchParametersDto.getTitle()));
         }
         return spec;
