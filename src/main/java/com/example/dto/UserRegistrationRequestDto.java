@@ -17,6 +17,7 @@ public class UserRegistrationRequestDto {
     private String password;
 
     @NotBlank(message = "Repeat password is required")
+    @Size(min = 8, message = "Repeat password must be at least 8 characters long")
     private String repeatPassword;
 
     @NotBlank(message = "First name is required")

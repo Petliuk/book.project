@@ -24,12 +24,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, name = "first_name")
+    @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false, name = "last_name")
+    @Column(nullable = false)
     private String lastName;
 
-    @Column(name = "shipping_address")
     private String shippingAddress;
 }
