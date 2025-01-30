@@ -21,7 +21,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto register(UserRegistrationRequestDto requestDto) {
         if (userRepository.existsByEmail(requestDto.getEmail())) {
-            throw new RegistrationException("Email is already taken");
+            throw new RegistrationException("Email: "
+                    + requestDto.getEmail() + " is already taken");
         }
         User user = userMapper.toEntity(requestDto);
         userRepository.save(user);

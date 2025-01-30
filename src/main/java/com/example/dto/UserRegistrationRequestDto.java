@@ -1,11 +1,14 @@
 package com.example.dto;
 
+import com.example.annotation.FieldMatch;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
+@FieldMatch(first = "password", second = "repeatPassword",
+        message = "Passwords must match")
 public class UserRegistrationRequestDto {
 
     @Email(message = "Invalid email format")
