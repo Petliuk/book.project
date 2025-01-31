@@ -3,6 +3,7 @@ package com.example.annotation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 public class FieldMatchValidator implements ConstraintValidator<FieldMatch, Object> {
     private String firstFieldName;
@@ -19,7 +20,7 @@ public class FieldMatchValidator implements ConstraintValidator<FieldMatch, Obje
         try {
             final Object firstObj = getFieldValue(value, firstFieldName);
             final Object secondObj = getFieldValue(value, secondFieldName);
-            return firstObj != null && firstObj.equals(secondObj);
+            return Objects.equals(firstObj, secondObj);
         } catch (Exception e) {
             return false;
         }

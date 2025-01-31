@@ -19,7 +19,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserResponseDto register(UserRegistrationRequestDto requestDto) {
+    public UserResponseDto register(UserRegistrationRequestDto requestDto)
+            throws RegistrationException {
         if (userRepository.existsByEmail(requestDto.getEmail())) {
             throw new RegistrationException("Email: "
                     + requestDto.getEmail() + " is already taken");
