@@ -10,8 +10,7 @@ import com.example.repository.role.RoleRepository;
 import com.example.repository.user.UserRepository;
 import com.example.service.UserService;
 import jakarta.transaction.Transactional;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,16 +27,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto register(UserRegistrationRequestDto requestDto)
             throws RegistrationException {
-        Optional<User> existingUser = userRepository.findByEmail(requestDto.getEmail());
-        if (existingUser.isPresent()) {
+        if (userRepository.existsByEmail(requestDto.getEmail())) {
             throw new RegistrationException("Email: "
                     + requestDto.getEmail() + " is already taken");
         }
         User user = userMapper.toEntity(requestDto);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        Role userRole = roleRepository.findById(1L)
+        Role userRole = roleRepository.findByRole(Role.RoleName.USER)
                 .orElseThrow(() -> new RuntimeException("Default role USER not found"));
-        user.setRoles(Collections.singleton(userRole));
+        user.setRoles(Set.of(userRole));
         userRepository.save(user);
         return userMapper.toDto(user);
     }
