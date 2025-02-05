@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/books")
+@RequestMapping("/api/books")
 @Tag(name = "Book Controller",
         description = "Manage books with CRUD operations and search functionality")
 public class BookController {
@@ -44,6 +45,7 @@ public class BookController {
         return bookService.getBookById(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @Operation(summary = "Search books",
             description = "Search for books based on specific parameters")
     @GetMapping("/search")
@@ -51,6 +53,7 @@ public class BookController {
         return bookService.search(searchParameters);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Create a new book",
             description = "Add a new book to the system")
     @PostMapping
@@ -59,6 +62,7 @@ public class BookController {
         return bookService.createBook(bookDto);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update an existing book",
             description = "Update the details of a book by ID")
     @PutMapping("/{id}")
@@ -66,6 +70,7 @@ public class BookController {
         return bookService.updateBook(id, bookDto);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Delete a book",
             description = "Remove a book from the system by ID")
     @ResponseStatus(HttpStatus.NO_CONTENT)

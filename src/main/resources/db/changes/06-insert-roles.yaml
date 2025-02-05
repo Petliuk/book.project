@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-roles
+      author: book-project
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role
+                  value: "USER"
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role
+                  value: "ADMIN"
+      rollback:
+        - delete:
+            tableName: roles
+            where: "role IN ('USER', 'ADMIN')"
