@@ -17,12 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @EnableMethodSecurity
 @Configuration
 @RequiredArgsConstructor
-@EnableWebMvc
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -42,8 +40,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/auth/**",
                                         "/swagger-ui/**",
-                                        "/v3/api-docs/**",
-                                        "/webjars/**")
+                                        "/v3/api-docs/**"
+                                )
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

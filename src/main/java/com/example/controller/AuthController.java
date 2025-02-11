@@ -36,7 +36,7 @@ public class AuthController {
     @Operation(summary = "User login",
             description = "Authenticates a user and returns an access token")
     @PostMapping("/login")
-    public UserLoginResponseDto login(@RequestBody UserLoginRequestDto request) {
+    public UserLoginResponseDto login(@RequestBody @Valid UserLoginRequestDto request) {
         return authenticationService.authenticate(request);
     }
 
