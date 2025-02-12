@@ -1,4 +1,4 @@
-package com.example.service.impl;
+package com.example.security;
 
 import com.example.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
