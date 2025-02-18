@@ -6,35 +6,39 @@ import com.example.dto.BookDtoWithoutCategoryIds;
 import com.example.dto.CreateBookRequestDto;
 import com.example.model.Book;
 import com.example.model.Category;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 @Mapper(config = MapperConfig.class)
 public interface BookMapper {
     Book toEntity(CreateBookRequestDto requestDto);
 
+    @Mapping(source = "categories", target = "categoryIds", qualifiedByName = "setCategoryIds")
     BookDto toDto(Book book);
+
+    @Mapping(target = "categories", ignore = true)
+    void updateBookFromDto(CreateBookRequestDto bookDto, @MappingTarget Book book);
 
     BookDtoWithoutCategoryIds toDtoWithoutCategories(Book book);
 
-    default Set<Category> map(List<String> categoryNames) {
-        if (categoryNames == null) {
-            return null;
+    default Set<Category> categoryById(Set<Long> categoryIds) {
+        if (categoryIds != null) {
+            return categoryIds.stream()
+                    .map(Category::new)
+                    .collect(Collectors.toSet());
         }
-        return categoryNames.stream()
-                .map(Category::new)
+        return new HashSet<>();
+    }
+
+    @Named("setCategoryIds")
+    default Set<Long> setCategoryIds(Set<Category> categories) {
+        return categories.stream()
+                .map(Category::getId)
                 .collect(Collectors.toSet());
     }
-
-    default List<String> map(Set<Category> categories) {
-        if (categories == null) {
-            return null;
-        }
-        return categories.stream()
-                .map(Category::getName)
-                .collect(Collectors.toList());
-    }
-
 }

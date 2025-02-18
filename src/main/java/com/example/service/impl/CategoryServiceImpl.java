@@ -1,7 +1,8 @@
 package com.example.service.impl;
 
 import com.example.dto.BookDtoWithoutCategoryIds;
-import com.example.dto.CategoryDto;
+import com.example.dto.CategoryRequestDto;
+import com.example.dto.CategoryResponseDto;
 import com.example.exception.EntityNotFoundException;
 import com.example.mapper.BookMapper;
 import com.example.mapper.CategoryMapper;
@@ -12,10 +13,13 @@ import com.example.service.CategoryService;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
@@ -23,33 +27,30 @@ public class CategoryServiceImpl implements CategoryService {
     private final BookMapper bookMapper;
 
     @Override
-    public List<CategoryDto> findAll() {
-        return categoryRepository.findAll()
-                .stream()
-                .map(categoryMapper::toDto)
-                .toList();
+    public Page<CategoryResponseDto> findAll(Pageable pageable) {
+        return categoryRepository.findAll(pageable)
+                .map(categoryMapper::toResponseDto);
     }
 
     @Override
-    public CategoryDto getById(Long id) {
-        return categoryMapper.toDto(categoryRepository.findById(id)
+    public CategoryResponseDto getById(Long id) {
+        return categoryMapper.toResponseDto(categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found")));
     }
 
     @Override
-    public CategoryDto save(CategoryDto categoryDto) {
+    public CategoryResponseDto save(CategoryRequestDto categoryDto) {
         Category category = categoryMapper.toEntity(categoryDto);
-        return categoryMapper.toDto(categoryRepository.save(category));
+        return categoryMapper.toResponseDto(categoryRepository.save(category));
     }
 
-    @Transactional
     @Override
-    public CategoryDto update(Long id, CategoryDto categoryDto) {
+    public CategoryResponseDto update(Long id, CategoryRequestDto categoryDto) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Cant find category by id " + id)
-        );
-        return categoryMapper.toDto(categoryRepository.save(category));
-
+                () -> new EntityNotFoundException("Cant find category by id " + id));
+        category.setName(categoryDto.getName());
+        category.setDescription(categoryDto.getDescription());
+        return categoryMapper.toResponseDto(categoryRepository.save(category));
     }
 
     @Override
@@ -58,8 +59,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<BookDtoWithoutCategoryIds> getBooksByCategoryId(Long id) {
-        return bookRepository.findAllByCategoriesId(id).stream()
+    public List<BookDtoWithoutCategoryIds> getBooksByCategoryId(Long id, Pageable pageable) {
+        return bookRepository.findAllByCategoriesId(id, pageable).stream()
                 .map(bookMapper::toDtoWithoutCategories)
                 .toList();
     }
