@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Service
 @RequiredArgsConstructor
@@ -55,8 +54,8 @@ public class BookServiceImpl implements BookService {
         }
         Book book = bookMapper.toEntity(requestDto);
         book.setCategories(categories);
-        Book savedBook = bookRepository.save(book);
-        return bookMapper.toDto(savedBook);
+        bookRepository.save(book);
+        return bookMapper.toDto(book);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> search(@RequestParam BookSearchParametersDto params) {
+    public List<BookDto> search(BookSearchParametersDto params) {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(params);
         return bookRepository.findAll(bookSpecification)
                 .stream()
