@@ -34,6 +34,7 @@ public class BookController {
     @Operation(summary = "Get all books",
             description = "Retrieve a list of all books with pagination support")
     @GetMapping
+    @PreAuthorize("hasAuthority('USER')")
     public Page<BookDto> getAll(Pageable pageable) {
         return bookService.getAll(pageable);
     }
@@ -41,11 +42,12 @@ public class BookController {
     @Operation(summary = "Get book by ID",
             description = "Retrieve details of a book by its ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER')")
     public BookDto getBookById(@PathVariable Long id) {
         return bookService.getBookById(id);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Search books",
             description = "Search for books based on specific parameters")
     @GetMapping("/search")
@@ -53,7 +55,7 @@ public class BookController {
         return bookService.search(searchParameters);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Create a new book",
             description = "Add a new book to the system")
     @PostMapping
@@ -62,15 +64,16 @@ public class BookController {
         return bookService.createBook(bookDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Update an existing book",
             description = "Update the details of a book by ID")
     @PutMapping("/{id}")
-    public BookDto updateBook(@PathVariable Long id, @RequestBody CreateBookRequestDto bookDto) {
+    public BookDto updateBook(@PathVariable Long id,
+                              @RequestBody @Valid CreateBookRequestDto bookDto) {
         return bookService.updateBook(id, bookDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Delete a book",
             description = "Remove a book from the system by ID")
     @ResponseStatus(HttpStatus.NO_CONTENT)
