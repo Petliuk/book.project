@@ -1,8 +1,8 @@
 package com.example.service.impl;
 
-import com.example.dto.BookDtoWithoutCategoryIds;
-import com.example.dto.CategoryRequestDto;
-import com.example.dto.CategoryResponseDto;
+import com.example.dto.book.BookDtoWithoutCategoryIds;
+import com.example.dto.category.CategoryRequestDto;
+import com.example.dto.category.CategoryResponseDto;
 import com.example.exception.EntityNotFoundException;
 import com.example.mapper.BookMapper;
 import com.example.mapper.CategoryMapper;
