@@ -1,8 +1,8 @@
 package com.example.mapper;
 
 import com.example.config.MapperConfig;
-import com.example.dto.CategoryRequestDto;
-import com.example.dto.CategoryResponseDto;
+import com.example.dto.category.CategoryRequestDto;
+import com.example.dto.category.CategoryResponseDto;
 import com.example.model.Category;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

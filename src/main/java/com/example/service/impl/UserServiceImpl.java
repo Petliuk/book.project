@@ -1,13 +1,14 @@
 package com.example.service.impl;
 
-import com.example.dto.UserRegistrationRequestDto;
-import com.example.dto.UserResponseDto;
+import com.example.dto.user.UserRegistrationRequestDto;
+import com.example.dto.user.UserResponseDto;
 import com.example.exception.RegistrationException;
 import com.example.mapper.UserMapper;
 import com.example.model.Role;
 import com.example.model.User;
 import com.example.repository.role.RoleRepository;
 import com.example.repository.user.UserRepository;
+import com.example.service.ShoppingCartService;
 import com.example.service.UserService;
 import jakarta.transaction.Transactional;
 import java.util.Set;
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ShoppingCartService shoppingCartService;
 
     @Override
     public UserResponseDto register(UserRegistrationRequestDto requestDto)
@@ -37,6 +39,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Default role USER not found"));
         user.setRoles(Set.of(userRole));
         userRepository.save(user);
+        shoppingCartService.create(user);
         return userMapper.toDto(user);
     }
 }
