@@ -1,6 +1,5 @@
 package com.example.controller;
 
-import com.example.dto.cart.CartItemDto;
 import com.example.dto.cart.CartItemRequestDto;
 import com.example.dto.cart.ShoppingCartDto;
 import com.example.dto.cart.UpdateCartItemDto;
@@ -33,14 +32,15 @@ public class ShoppingCartController {
     @Operation(summary = "Get shopping cart details",
             description = "Retrieve details of the current user's shopping cart")
     public ShoppingCartDto get(Authentication authentication) {
-        return shoppingCartService.get(authentication);
+        Long userId = shoppingCartService.getUserId(authentication);
+        return shoppingCartService.get(userId);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Add an item to the shopping cart",
             description = "Add a new item to the user's shopping cart")
-    public CartItemDto saveItem(Authentication authentication,
+    public ShoppingCartDto saveItem(Authentication authentication,
                                 @RequestBody @Valid CartItemRequestDto createDto) {
         return shoppingCartService.save(authentication, createDto);
     }
@@ -49,7 +49,7 @@ public class ShoppingCartController {
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Update the quantity of a cart item",
             description = "Modify the quantity of an existing item in the shopping cart")
-    public CartItemDto updateItemQuantity(Authentication authentication,
+    public ShoppingCartDto updateItemQuantity(Authentication authentication,
                                           @PathVariable Long cartItemId,
                                           @RequestBody @Valid UpdateCartItemDto updateDto) {
         return shoppingCartService.update(authentication, cartItemId, updateDto);
@@ -60,6 +60,7 @@ public class ShoppingCartController {
     @Operation(summary = "Remove an item from the shopping cart",
             description = "Delete an item from the shopping cart by its ID")
     public void deleteItemById(Authentication authentication, @PathVariable Long cartItemId) {
-        shoppingCartService.deleteById(authentication, cartItemId);
+        Long userId = shoppingCartService.getUserId(authentication);
+        shoppingCartService.deleteById(userId, cartItemId);
     }
 }

@@ -10,13 +10,9 @@ import com.example.repository.role.RoleRepository;
 import com.example.repository.user.UserRepository;
 import com.example.service.ShoppingCartService;
 import com.example.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +24,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private ShoppingCartService shoppingCartService;
-
-    @Autowired
-    public void setShoppingCartService(@Lazy ShoppingCartService shoppingCartService) {
-        this.shoppingCartService = shoppingCartService;
-    }
+    private final ShoppingCartService shoppingCartService;
 
     @Override
     public UserResponseDto register(UserRegistrationRequestDto requestDto)
@@ -50,12 +41,5 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         shoppingCartService.create(user);
         return userMapper.toDto(user);
-    }
-
-    @Override
-    public User getAuthenticatedUser(Authentication authentication) {
-        return userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new EntityNotFoundException("Can't find a user by email: "
-                        + authentication.getName()));
     }
 }

@@ -22,4 +22,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
             + "WHERE ci.shoppingCart.id = :id "
             + "AND ci.isDeleted = false")
     List<CartItem> findAllByShoppingCartId(Long id);
+
+    Optional<CartItem> findByIdAndShoppingCartId(Long id, Long shoppingCartId);
 }
