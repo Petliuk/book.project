@@ -7,5 +7,5 @@ public class CartItemDto {
     private Long id;
     private Long bookId;
     private String bookTitle;
-    private Long quantity;
+    private int quantity;
 }
