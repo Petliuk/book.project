@@ -12,5 +12,4 @@ public class CartItemRequestDto {
 
     @Positive
     private int quantity;
-
 }

@@ -36,6 +36,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return cartMapper.toDto(shoppingCart);
     }
 
+    @Override
     public ShoppingCartDto save(Long userId, CartItemRequestDto requestDto) {
         ShoppingCart shoppingCart = shoppingCartRepository
                 .getShoppingCartByUserId(userId)
