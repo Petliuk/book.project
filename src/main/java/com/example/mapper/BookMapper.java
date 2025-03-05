@@ -1,9 +1,9 @@
 package com.example.mapper;
 
 import com.example.config.MapperConfig;
-import com.example.dto.BookDto;
-import com.example.dto.BookDtoWithoutCategoryIds;
-import com.example.dto.CreateBookRequestDto;
+import com.example.dto.book.BookDto;
+import com.example.dto.book.BookDtoWithoutCategoryIds;
+import com.example.dto.book.CreateBookRequestDto;
 import com.example.model.Book;
 import com.example.model.Category;
 import java.util.HashSet;

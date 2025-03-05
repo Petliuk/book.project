@@ -1,8 +1,8 @@
 package com.example.controller;
 
-import com.example.dto.BookDtoWithoutCategoryIds;
-import com.example.dto.CategoryRequestDto;
-import com.example.dto.CategoryResponseDto;
+import com.example.dto.book.BookDtoWithoutCategoryIds;
+import com.example.dto.category.CategoryRequestDto;
+import com.example.dto.category.CategoryResponseDto;
 import com.example.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
