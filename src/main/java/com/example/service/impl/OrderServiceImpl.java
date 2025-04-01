@@ -1,14 +1,17 @@
 package com.example.service.impl;
 
+import com.example.dto.order.OrderItemResponseDto;
 import com.example.dto.order.OrderRequestDto;
 import com.example.dto.order.OrderResponseDto;
 import com.example.dto.order.OrderStatusUpdateDto;
+import com.example.mapper.OrderItemMapper;
 import com.example.mapper.OrderMapper;
 import com.example.model.Order;
 import com.example.model.OrderItem;
 import com.example.model.OrderStatus;
 import com.example.model.ShoppingCart;
 import com.example.repository.cart.ShoppingCartRepository;
+import com.example.repository.order.OrderItemRepository;
 import com.example.repository.order.OrderRepository;
 import com.example.service.OrderService;
 import com.example.service.ShoppingCartService;
@@ -29,6 +32,24 @@ public class OrderServiceImpl implements OrderService {
     private final ShoppingCartRepository shoppingCartRepository;
     private final ShoppingCartService shoppingCartService;
     private final OrderMapper orderMapper;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderItemMapper orderItemMapper;
+
+    @Override
+    public List<OrderItemResponseDto> getOrderItems(Long orderId) {
+        return orderItemRepository.findAllByOrderId(orderId)
+                .stream()
+                .map(orderItemMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderItemResponseDto getOrderItem(Long orderId, Long itemId) {
+        return orderItemRepository.findByIdAndOrderId(itemId, orderId)
+                .map(orderItemMapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Order item not found with ID: "
+                        + itemId + " in order: " + orderId));
+    }
 
     @Override
     @Transactional

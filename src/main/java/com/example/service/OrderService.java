@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.dto.order.OrderItemResponseDto;
 import com.example.dto.order.OrderRequestDto;
 import com.example.dto.order.OrderResponseDto;
 import com.example.dto.order.OrderStatusUpdateDto;
@@ -12,4 +13,8 @@ public interface OrderService {
     List<OrderResponseDto> getOrderHistory(Long userId, Pageable pageable);
 
     OrderResponseDto updateOrderStatus(Long orderId, OrderStatusUpdateDto updateDto);
+
+    List<OrderItemResponseDto> getOrderItems(Long orderId);
+
+    OrderItemResponseDto getOrderItem(Long orderId, Long itemId);
 }

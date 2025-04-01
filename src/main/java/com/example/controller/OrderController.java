@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.order.OrderItemResponseDto;
 import com.example.dto.order.OrderRequestDto;
 import com.example.dto.order.OrderResponseDto;
 import com.example.dto.order.OrderStatusUpdateDto;
@@ -58,5 +59,22 @@ public class OrderController {
     public OrderResponseDto updateOrderStatus(@PathVariable Long id,
                                               @RequestBody @Valid OrderStatusUpdateDto updateDto) {
         return orderService.updateOrderStatus(id, updateDto);
+    }
+
+    @GetMapping("/orders/{orderId}/items")
+    @PreAuthorize("hasAuthority('USER')")
+    @Operation(summary = "Get all order items",
+            description = "Retrieve all items for a specific order")
+    public List<OrderItemResponseDto> getOrderItems(@PathVariable Long orderId) {
+        return orderService.getOrderItems(orderId);
+    }
+
+    @GetMapping("/{itemId}")
+    @PreAuthorize("hasAuthority('USER')")
+    @Operation(summary = "Get specific order item",
+            description = "Retrieve a specific item within an order")
+    public OrderItemResponseDto getOrderItem(@PathVariable Long orderId,
+                                             @PathVariable("itemId") Long itemId) {
+        return orderService.getOrderItem(orderId, itemId);
     }
 }
