@@ -1,0 +1,93 @@
+package com.example.service.impl;
+
+import com.example.dto.order.OrderRequestDto;
+import com.example.dto.order.OrderResponseDto;
+import com.example.dto.order.OrderStatusUpdateDto;
+import com.example.mapper.OrderMapper;
+import com.example.model.Order;
+import com.example.model.OrderItem;
+import com.example.model.OrderStatus;
+import com.example.model.ShoppingCart;
+import com.example.repository.cart.ShoppingCartRepository;
+import com.example.repository.order.OrderRepository;
+import com.example.service.OrderService;
+import com.example.service.ShoppingCartService;
+import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class OrderServiceImpl implements OrderService {
+    private final OrderRepository orderRepository;
+    private final ShoppingCartRepository shoppingCartRepository;
+    private final ShoppingCartService shoppingCartService;
+    private final OrderMapper orderMapper;
+
+    @Override
+    @Transactional
+    public OrderResponseDto placeOrder(Long userId, OrderRequestDto requestDto) {
+        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(userId)
+                .orElseThrow(()
+                        -> new EntityNotFoundException("Shopping cart not found for user ID: "
+                        + userId));
+
+        if (shoppingCart.getCartItems() == null || shoppingCart.getCartItems().isEmpty()) {
+            throw new IllegalStateException("Cannot place an order with an empty shopping cart.");
+        }
+
+        Order order = Order.builder()
+                .user(shoppingCart.getUser())
+                .status(OrderStatus.PENDING)
+                .total(calculateTotal(shoppingCart))
+                .orderDate(LocalDateTime.now())
+                .shippingAddress(requestDto.getShippingAddress())
+                .build();
+
+        shoppingCart.getCartItems().forEach(cartItem -> {
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .book(cartItem.getBook())
+                    .quantity(cartItem.getQuantity())
+                    .price(cartItem.getBook().getPrice())
+                    .build();
+            order.getOrderItems().add(orderItem);
+        });
+
+        Order savedOrder = orderRepository.save(order);
+        shoppingCartService.clearCart(userId);
+        return orderMapper.toDto(savedOrder);
+    }
+
+    @Override
+    public List<OrderResponseDto> getOrderHistory(Long userId, Pageable pageable) {
+        return orderRepository.findAllByUserId(userId, pageable)
+                .stream()
+                .map(orderMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public OrderResponseDto updateOrderStatus(Long orderId, OrderStatusUpdateDto updateDto) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(()
+                        -> new EntityNotFoundException("Order not found with ID: " + orderId));
+        order.setStatus(OrderStatus.valueOf(updateDto.getStatus().toUpperCase()));
+        return orderMapper.toDto(orderRepository.save(order));
+    }
+
+    private BigDecimal calculateTotal(ShoppingCart shoppingCart) {
+        return shoppingCart.getCartItems().stream()
+                .map(cartItem -> cartItem.getBook()
+                        .getPrice()
+                        .multiply(BigDecimal.valueOf(cartItem.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+}

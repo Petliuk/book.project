@@ -18,4 +18,6 @@ public interface ShoppingCartService {
     void deleteById(Long userId, Long cartItemId);
 
     void create(User user);
+
+    void clearCart(Long userId);
 }
