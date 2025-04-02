@@ -105,4 +105,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 ));
         cartItemRepository.deleteAllByShoppingCartId(shoppingCart.getId());
     }
+
+    public ShoppingCart getShoppingCartByUserId(Long userId) {
+        return shoppingCartRepository.getShoppingCartByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Shopping cart for user with ID " + userId + " not found."
+                ));
+    }
 }

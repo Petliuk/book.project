@@ -54,33 +54,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponseDto placeOrder(Long userId, OrderRequestDto requestDto) {
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(userId)
-                .orElseThrow(()
-                        -> new EntityNotFoundException("Shopping cart not found for user ID: "
-                        + userId));
-
+        ShoppingCart shoppingCart = shoppingCartService.getShoppingCartByUserId(userId);
         if (shoppingCart.getCartItems() == null || shoppingCart.getCartItems().isEmpty()) {
             throw new IllegalStateException("Cannot place an order with an empty shopping cart.");
         }
-
-        Order order = Order.builder()
-                .user(shoppingCart.getUser())
-                .status(OrderStatus.PENDING)
-                .total(calculateTotal(shoppingCart))
-                .orderDate(LocalDateTime.now())
-                .shippingAddress(requestDto.getShippingAddress())
-                .build();
-
-        shoppingCart.getCartItems().forEach(cartItem -> {
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .book(cartItem.getBook())
-                    .quantity(cartItem.getQuantity())
-                    .price(cartItem.getBook().getPrice())
-                    .build();
-            order.getOrderItems().add(orderItem);
-        });
-
+        Order order = createOrder(shoppingCart, requestDto);
+        addOrderItemsFromCart(shoppingCart, order);
         Order savedOrder = orderRepository.save(order);
         shoppingCartService.clearCart(userId);
         return orderMapper.toDto(savedOrder);
@@ -110,5 +89,27 @@ public class OrderServiceImpl implements OrderService {
                         .getPrice()
                         .multiply(BigDecimal.valueOf(cartItem.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private Order createOrder(ShoppingCart shoppingCart, OrderRequestDto requestDto) {
+        return Order.builder()
+                .user(shoppingCart.getUser())
+                .status(OrderStatus.PENDING)
+                .total(calculateTotal(shoppingCart))
+                .orderDate(LocalDateTime.now())
+                .shippingAddress(requestDto.getShippingAddress())
+                .build();
+    }
+
+    private void addOrderItemsFromCart(ShoppingCart shoppingCart, Order order) {
+        shoppingCart.getCartItems().forEach(cartItem -> {
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .book(cartItem.getBook())
+                    .quantity(cartItem.getQuantity())
+                    .price(cartItem.getBook().getPrice())
+                    .build();
+            order.getOrderItems().add(orderItem);
+        });
     }
 }
