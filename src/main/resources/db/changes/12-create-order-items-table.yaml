@@ -37,6 +37,3 @@ databaseChangeLog:
                   type: decimal(10,2)
                   constraints:
                     nullable: false
-      rollback:
-        - dropTable:
-            tableName: order_items

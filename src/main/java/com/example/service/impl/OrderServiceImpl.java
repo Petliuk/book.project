@@ -17,9 +17,7 @@ import com.example.service.OrderService;
 import com.example.service.ShoppingCartService;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ShoppingCartRepository shoppingCartRepository;
@@ -40,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
         return orderItemRepository.findAllByOrderId(orderId)
                 .stream()
                 .map(orderItemMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -52,7 +51,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
     public OrderResponseDto placeOrder(Long userId, OrderRequestDto requestDto) {
         ShoppingCart shoppingCart = shoppingCartService.getShoppingCartByUserId(userId);
         if (shoppingCart.getCartItems() == null || shoppingCart.getCartItems().isEmpty()) {
@@ -60,9 +58,9 @@ public class OrderServiceImpl implements OrderService {
         }
         Order order = createOrder(shoppingCart, requestDto);
         addOrderItemsFromCart(shoppingCart, order);
-        Order savedOrder = orderRepository.save(order);
+        orderRepository.save(order);
         shoppingCartService.clearCart(userId);
-        return orderMapper.toDto(savedOrder);
+        return orderMapper.toDto(order);
     }
 
     @Override
@@ -70,11 +68,10 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAllByUserId(userId, pageable)
                 .stream()
                 .map(orderMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
-    @Transactional
     public OrderResponseDto updateOrderStatus(Long orderId, OrderStatusUpdateDto updateDto) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(()
@@ -94,9 +91,7 @@ public class OrderServiceImpl implements OrderService {
     private Order createOrder(ShoppingCart shoppingCart, OrderRequestDto requestDto) {
         return Order.builder()
                 .user(shoppingCart.getUser())
-                .status(OrderStatus.PENDING)
                 .total(calculateTotal(shoppingCart))
-                .orderDate(LocalDateTime.now())
                 .shippingAddress(requestDto.getShippingAddress())
                 .build();
     }

@@ -103,7 +103,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Shopping cart for user with ID " + userId + " not found."
                 ));
-        cartItemRepository.deleteAllByShoppingCartId(shoppingCart.getId());
+        shoppingCart.clearCart();
+        shoppingCartRepository.save(shoppingCart);
     }
 
     public ShoppingCart getShoppingCartByUserId(Long userId) {

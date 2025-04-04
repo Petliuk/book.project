@@ -46,6 +46,3 @@ databaseChangeLog:
                   defaultValueBoolean: false
                   constraints:
                     nullable: false
-      rollback:
-        - dropTable:
-            tableName: orders
