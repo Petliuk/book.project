@@ -39,4 +39,8 @@ public class ShoppingCart {
 
     @Column(nullable = false)
     private boolean isDeleted = false;
+
+    public void clearCart() {
+        cartItems.clear();
+    }
 }
