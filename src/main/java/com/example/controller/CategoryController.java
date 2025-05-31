@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("role('USER')")
     @Operation(summary = "Get all categories",
             description = "Retrieve a list of all categories")
     @GetMapping
