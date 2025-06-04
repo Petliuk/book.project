@@ -5,8 +5,7 @@ import com.example.dto.category.CategoryRequestDto;
 import com.example.dto.category.CategoryResponseDto;
 import com.example.exception.EntityNotFoundException;
 import com.example.service.CategoryService;
-import com.example.util.constants.CategoryControllerConstants;
-import com.example.util.utils.CategoryControllerUtils;
+import com.example.utils.CategoryControllerUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -35,12 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
@@ -62,9 +62,7 @@ class CategoryControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
-        pageableResolver.setFallbackPageable(PageRequest.of(
-                Integer.parseInt(CategoryControllerConstants.PAGE),
-                Integer.parseInt(CategoryControllerConstants.SIZE)));
+        pageableResolver.setFallbackPageable(PageRequest.of(0, 10));
         mockMvc = MockMvcBuilders
                 .standaloneSetup(categoryController)
                 .setCustomArgumentResolvers(pageableResolver)
@@ -76,195 +74,166 @@ class CategoryControllerTest {
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Create category with valid request")
     void createCategory_ValidRequest_Success() throws Exception {
-        // Given:
+        // Given
         CategoryRequestDto requestDto = CategoryControllerUtils.createCategoryRequestDto();
-        CategoryResponseDto expected = CategoryControllerUtils
-                .createCategoryResponseDto(CategoryControllerConstants.VALID_ID);
+        CategoryResponseDto expected = CategoryControllerUtils.createCategoryResponseDto(CategoryControllerUtils.VALID_ID);
         when(categoryService.save(any(CategoryRequestDto.class))).thenReturn(expected);
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-        // When:
+        // When
         MvcResult result = mockMvc.perform(
-                post(CategoryControllerConstants.CATEGORIES_ENDPOINT)
-                        .content(jsonRequest)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isCreated()).andReturn();
+                        post(CategoryControllerUtils.CATEGORIES_URL)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-        // Then:
+        // Then
         CategoryResponseDto actual = CategoryControllerUtils.parseResponse(
                 result, CategoryResponseDto.class, objectMapper);
-        assertNotNull(actual, CategoryControllerConstants.RESPONSE_NOT_NULL_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"),
-                CategoryControllerConstants.CATEGORY_DETAILS_MATCH_MESSAGE);
+        assertNotNull(actual);
+        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
     }
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
     @DisplayName("Get all categories with valid size")
     void getAll_CategoriesExist_Success() throws Exception {
-        // Given:
-        CategoryResponseDto category1 = CategoryControllerUtils
-                .createCategoryResponseDto(CategoryControllerConstants.VALID_ID);
-        CategoryResponseDto category2 = CategoryControllerUtils
-                .createNonFictionCategoryResponseDto(CategoryControllerConstants.CATEGORY_ID_2);
-        CategoryResponseDto category3 = CategoryControllerUtils
-                .createScienceCategoryResponseDto(CategoryControllerConstants.CATEGORY_ID_3);
+        // Given
+        CategoryResponseDto category1 = CategoryControllerUtils.createCategoryResponseDto(1L);
+        CategoryResponseDto category2 = CategoryControllerUtils.createNonFictionCategoryResponseDto(2L);
+        CategoryResponseDto category3 = CategoryControllerUtils.createScienceCategoryResponseDto(3L);
         List<CategoryResponseDto> categories = List.of(category1, category2, category3);
         Page<CategoryResponseDto> page = CategoryControllerUtils.createCategoryPage(categories);
         when(categoryService.findAll(any(Pageable.class))).thenReturn(page);
 
-        // When:
+        // When
         MvcResult result = mockMvc.perform(
-                get(CategoryControllerConstants.CATEGORIES_ENDPOINT)
-                        .param(CategoryControllerConstants.PAGE_PARAM, CategoryControllerConstants.PAGE)
-                        .param(CategoryControllerConstants.SIZE_PARAM, CategoryControllerConstants.SIZE)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn();
+                        get(CategoryControllerUtils.CATEGORIES_URL)
+                                .param("page", CategoryControllerUtils.PAGE)
+                                .param("size", CategoryControllerUtils.SIZE))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Then:
-        List<CategoryResponseDto> actual = CategoryControllerUtils
-                .parsePagedCategoryResponse(result, objectMapper);
-        assertNotNull(actual, CategoryControllerConstants.RESPONSE_NOT_NULL_MESSAGE);
-        assertEquals(3, actual.size(), CategoryControllerConstants.EXPECTED_CATEGORY_COUNT_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(category1, actual.get(0), "id"),
-                CategoryControllerConstants.CATEGORY_DETAILS_MATCH_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(category2, actual.get(1), "id"),
-                CategoryControllerConstants.CATEGORY_DETAILS_MATCH_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(category3, actual.get(2), "id"),
-                CategoryControllerConstants.CATEGORY_DETAILS_MATCH_MESSAGE);
+        // Then
+        List<CategoryResponseDto> actual = CategoryControllerUtils.parsePagedCategoryResponse(result, objectMapper);
+        assertNotNull(actual);
+        assertEquals(3, actual.size());
+        assertEquals(categories, actual);
     }
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
     @DisplayName("Get category by valid ID")
     void getCategoryById_ValidId_Success() throws Exception {
-        // Given:
-        CategoryResponseDto expected = CategoryControllerUtils
-                .createCategoryResponseDto(CategoryControllerConstants.VALID_ID);
-        when(categoryService.getById(CategoryControllerConstants.VALID_ID)).thenReturn(expected);
+        // Given
+        CategoryResponseDto expected = CategoryControllerUtils.createCategoryResponseDto(CategoryControllerUtils.VALID_ID);
+        when(categoryService.getById(CategoryControllerUtils.VALID_ID)).thenReturn(expected);
 
-        // When:
+        // When
         MvcResult result = mockMvc.perform(
-                get(CategoryControllerConstants.CATEGORY_BY_ID_ENDPOINT,
-                        CategoryControllerConstants.VALID_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn();
+                        get(CategoryControllerUtils.CATEGORIES_URL + "/{id}", CategoryControllerUtils.VALID_ID))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Then:
+        // Then
         CategoryResponseDto actual = CategoryControllerUtils.parseResponse(
                 result, CategoryResponseDto.class, objectMapper);
-        assertNotNull(actual, CategoryControllerConstants.RESPONSE_NOT_NULL_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"),
-                CategoryControllerConstants.CATEGORY_DETAILS_MATCH_MESSAGE);
+        assertNotNull(actual);
+        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
     }
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
     @DisplayName("Get category by invalid ID")
     void getCategoryById_InvalidId_Fail() throws Exception {
-        // Given:
-        when(categoryService.getById(CategoryControllerConstants.INVALID_ID))
-                .thenThrow(new EntityNotFoundException(CategoryControllerConstants.NOT_FOUND_MESSAGE));
+        // Given
+        when(categoryService.getById(-1L))
+                .thenThrow(new EntityNotFoundException(CategoryControllerUtils.CATEGORY_NOT_FOUND_MESSAGE));
 
-        // When:
+        // When
         MvcResult result = mockMvc.perform(
-                get(CategoryControllerConstants.CATEGORY_BY_ID_ENDPOINT,
-                        CategoryControllerConstants.INVALID_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNotFound()).andReturn();
+                        get(CategoryControllerUtils.CATEGORIES_URL + "/{id}", -1L))
+                .andExpect(status().isNotFound())
+                .andReturn();
 
-        // Then:
-        assertTrue(result.getResolvedException() instanceof EntityNotFoundException,
-                CategoryControllerConstants.EXCEPTION_TYPE_MESSAGE);
-        assertEquals(CategoryControllerConstants.NOT_FOUND_MESSAGE,
-                result.getResolvedException().getMessage(),
-                CategoryControllerConstants.EXCEPTION_TYPE_MESSAGE);
+        // Then
+        assertTrue(result.getResolvedException() instanceof EntityNotFoundException);
+        assertEquals(CategoryControllerUtils.CATEGORY_NOT_FOUND_MESSAGE, result.getResolvedException().getMessage());
     }
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Update category by valid ID")
     void updateCategory_ValidId_Success() throws Exception {
-        // Given:
+        // Given
         CategoryRequestDto requestDto = CategoryControllerUtils.createUpdatedCategoryRequestDto();
-        CategoryResponseDto expected = CategoryControllerUtils
-                .createUpdatedCategoryResponseDto(CategoryControllerConstants.VALID_ID);
-        when(categoryService.update(eq(CategoryControllerConstants.VALID_ID),
-                any(CategoryRequestDto.class))).thenReturn(expected);
+        CategoryResponseDto expected = CategoryControllerUtils.createUpdatedCategoryResponseDto(CategoryControllerUtils.VALID_ID);
+        when(categoryService.update(eq(CategoryControllerUtils.VALID_ID), any(CategoryRequestDto.class))).thenReturn(expected);
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-        // When:
+        // When
         MvcResult result = mockMvc.perform(
-                put(CategoryControllerConstants.CATEGORY_BY_ID_ENDPOINT,
-                        CategoryControllerConstants.VALID_ID)
-                        .content(jsonRequest)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn();
+                        put(CategoryControllerUtils.CATEGORIES_URL + "/{id}", CategoryControllerUtils.VALID_ID)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Then:
+        // Then
         CategoryResponseDto actual = CategoryControllerUtils.parseResponse(
                 result, CategoryResponseDto.class, objectMapper);
-        assertNotNull(actual, CategoryControllerConstants.RESPONSE_NOT_NULL_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"),
-                CategoryControllerConstants.CATEGORY_DETAILS_MATCH_MESSAGE);
+        assertNotNull(actual);
+        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
     }
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Delete category by valid ID")
     void deleteCategoryById_ValidId_Success() throws Exception {
-        // Given:
-        doNothing().when(categoryService).deleteById(CategoryControllerConstants.VALID_ID);
-        when(categoryService.getById(CategoryControllerConstants.VALID_ID))
-                .thenThrow(new EntityNotFoundException(CategoryControllerConstants.NOT_FOUND_MESSAGE));
+        // Given
+        when(categoryService.getById(CategoryControllerUtils.VALID_ID))
+                .thenThrow(new EntityNotFoundException(CategoryControllerUtils.CATEGORY_NOT_FOUND_MESSAGE));
 
-        // When:
+        // When
         mockMvc.perform(
-                delete(CategoryControllerConstants.CATEGORY_BY_ID_ENDPOINT,
-                        CategoryControllerConstants.VALID_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNoContent());
+                        delete(CategoryControllerUtils.CATEGORIES_URL + "/{id}", CategoryControllerUtils.VALID_ID))
+                .andExpect(status().isNoContent());
 
-        // Then:
+        // Then
         MvcResult result = mockMvc.perform(
-                get(CategoryControllerConstants.CATEGORY_BY_ID_ENDPOINT,
-                        CategoryControllerConstants.VALID_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNotFound()).andReturn();
-        assertTrue(result.getResolvedException() instanceof EntityNotFoundException,
-                CategoryControllerConstants.EXCEPTION_TYPE_MESSAGE);
+                        get(CategoryControllerUtils.CATEGORIES_URL + "/{id}", CategoryControllerUtils.VALID_ID))
+                .andExpect(status().isNotFound())
+                .andReturn();
+        assertTrue(result.getResolvedException() instanceof EntityNotFoundException);
     }
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
     @DisplayName("Get books by category ID with valid ID")
     void getBooksByCategoryId_ValidId_Success() throws Exception {
-        // Given:
+        // Given
         List<BookDtoWithoutCategoryIds> expected = List.of(
                 CategoryControllerUtils.createBookDto1(),
-                CategoryControllerUtils.createBookDto2()
-        );
-        when(categoryService.getBooksByCategoryId(
-                eq(CategoryControllerConstants.VALID_ID), any(Pageable.class)))
+                CategoryControllerUtils.createBookDto2());
+        when(categoryService.getBooksByCategoryId(eq(CategoryControllerUtils.VALID_ID), any(Pageable.class)))
                 .thenReturn(expected);
 
-        // When:
+        // When
         MvcResult result = mockMvc.perform(
-                get(CategoryControllerConstants.BOOKS_BY_CATEGORY_ENDPOINT,
-                        CategoryControllerConstants.VALID_ID)
-                        .param(CategoryControllerConstants.PAGE_PARAM, CategoryControllerConstants.PAGE)
-                        .param(CategoryControllerConstants.SIZE_PARAM, CategoryControllerConstants.SIZE)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn();
+                        get(CategoryControllerUtils.CATEGORY_BOOKS_URL, CategoryControllerUtils.VALID_ID)
+                                .param("page", CategoryControllerUtils.PAGE)
+                                .param("size", CategoryControllerUtils.SIZE)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Then:
+        // Then
         List<BookDtoWithoutCategoryIds> actual = CategoryControllerUtils.parseResponse(
-                result, new TypeReference<List<BookDtoWithoutCategoryIds>>() {}, objectMapper);
-        assertNotNull(actual, CategoryControllerConstants.RESPONSE_NOT_NULL_MESSAGE);
-        assertEquals(2, actual.size(), CategoryControllerConstants.EXPECTED_BOOK_COUNT_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(expected.get(0), actual.get(0), "id"),
-                CategoryControllerConstants.BOOK_DETAILS_MATCH_MESSAGE);
-        assertTrue(EqualsBuilder.reflectionEquals(expected.get(1), actual.get(1), "id"),
-                CategoryControllerConstants.BOOK_DETAILS_MATCH_MESSAGE);
+                result, new TypeReference<>() {
+                }, objectMapper);
+        assertNotNull(actual);
+        assertEquals(2, actual.size());
+        assertEquals(expected, actual);
     }
 }

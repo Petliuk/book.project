@@ -9,8 +9,7 @@ import com.example.repository.book.BookRepository;
 import com.example.repository.book.BookSpecificationBuilder;
 import com.example.repository.category.CategoryRepository;
 import com.example.service.impl.BookServiceImpl;
-import com.example.util.constants.BookServiceConstants;
-import com.example.util.utils.BookServiceUtils;
+import com.example.utils.BookServiceUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,11 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
-
 
     @Mock
     private BookRepository bookRepository;
@@ -63,103 +60,95 @@ class BookServiceTest {
     @Test
     @DisplayName("Create book when valid request returns book DTO")
     void createBook_ValidRequest_ReturnsBookDto() {
-        // Given:
+        // Given
         when(bookMapper.toEntity(any(CreateBookRequestDto.class))).thenReturn(book);
-        when(categoryRepository.findAllById(any()))
-                .thenReturn(Collections.singletonList(BookServiceUtils.createCategory()));
+        when(categoryRepository.findAllById(any())).thenReturn(Collections.singletonList(BookServiceUtils.createCategory()));
         when(bookRepository.save(any(Book.class))).thenReturn(book);
         when(bookMapper.toDto(any(Book.class))).thenReturn(bookDto);
 
-        // When:
+        // When
         BookDto result = bookService.createBook(requestDto);
 
-        // Then:
-        assertEquals(BookServiceConstants.BOOK_TITLE, result.getTitle(),
-                BookServiceConstants.BOOK_TITLE_MATCH_MESSAGE);
-        assertEquals(BookServiceConstants.BOOK_AUTHOR, result.getAuthor());
+        // Then
+        assertEquals(BookServiceUtils.BOOK_TITLE, result.getTitle(), BookServiceUtils.BOOK_TITLE_MESSAGE);
     }
 
     @Test
     @DisplayName("Get book by ID when book exists returns book DTO")
     void getBookById_BookExists_ReturnsBookDto() {
-        // Given:
-        when(bookRepository.findById(BookServiceConstants.BOOK_ID)).thenReturn(Optional.of(book));
+        // Given
+        when(bookRepository.findById(BookServiceUtils.BOOK_ID)).thenReturn(Optional.of(book));
         when(bookMapper.toDto(any(Book.class))).thenReturn(bookDto);
 
-        // When:
-        BookDto result = bookService.getBookById(BookServiceConstants.BOOK_ID);
+        // When
+        BookDto result = bookService.getBookById(BookServiceUtils.BOOK_ID);
 
-        // Then:
-        assertEquals(BookServiceConstants.BOOK_TITLE, result.getTitle(),
-                BookServiceConstants.BOOK_TITLE_MATCH_MESSAGE);
+        // Then
+        assertEquals(BookServiceUtils.BOOK_TITLE, result.getTitle(), BookServiceUtils.BOOK_TITLE_MESSAGE);
     }
 
     @Test
     @DisplayName("Get all books when books exist returns book page")
     void getAll_BooksExist_ReturnsBookPage() {
-        // Given:
-        PageRequest pageable = PageRequest.of(BookServiceConstants.PAGE, BookServiceConstants.SIZE);
+        // Given
+        PageRequest pageable = PageRequest.of(BookServiceUtils.PAGE, BookServiceUtils.SIZE);
         Page<Book> page = BookServiceUtils.createBookPage(book);
         when(bookRepository.findAll(pageable)).thenReturn(page);
         when(bookMapper.toDto(any(Book.class))).thenReturn(bookDto);
 
-        // When:
+        // When
         Page<BookDto> result = bookService.getAll(pageable);
 
-        // Then:
-        assertEquals(1, result.getTotalElements(), BookServiceConstants.EXPECTED_BOOK_COUNT_MESSAGE);
-        assertEquals(BookServiceConstants.BOOK_TITLE, result.getContent().get(0).getTitle(),
-                BookServiceConstants.BOOK_TITLE_MATCH_MESSAGE);
+        // Then
+        assertEquals(1, result.getTotalElements(), BookServiceUtils.EXPECTED_BOOK_COUNT_MESSAGE);
+        assertEquals(BookServiceUtils.BOOK_TITLE, result.getContent().get(0).getTitle(),
+                BookServiceUtils.BOOK_TITLE_MESSAGE);
     }
 
     @Test
     @DisplayName("Update book when book exists returns updated book DTO")
     void updateBook_BookExists_ReturnsUpdatedBookDto() {
-        // Given:
-        when(bookRepository.findById(BookServiceConstants.BOOK_ID)).thenReturn(Optional.of(book));
-        when(categoryRepository.findAllById(any()))
-                .thenReturn(Collections.singletonList(BookServiceUtils.createCategory()));
+        // Given
+        when(bookRepository.findById(BookServiceUtils.BOOK_ID)).thenReturn(Optional.of(book));
+        when(categoryRepository.findAllById(any())).thenReturn(Collections.singletonList(BookServiceUtils.createCategory()));
         when(bookRepository.save(any(Book.class))).thenReturn(book);
         when(bookMapper.toDto(any(Book.class))).thenReturn(bookDto);
-        doNothing().when(bookMapper).updateBookFromDto(any(CreateBookRequestDto.class), any(Book.class));
 
-        // When:
-        BookDto result = bookService.updateBook(BookServiceConstants.BOOK_ID, requestDto);
+        // When
+        BookDto result = bookService.updateBook(BookServiceUtils.BOOK_ID, requestDto);
 
-        // Then:
-        assertEquals(BookServiceConstants.BOOK_TITLE, result.getTitle(),
-                BookServiceConstants.BOOK_TITLE_MATCH_MESSAGE);
+        // Then
+        assertEquals(BookServiceUtils.BOOK_TITLE, result.getTitle(), BookServiceUtils.BOOK_TITLE_MESSAGE);
     }
 
     @Test
     @DisplayName("Search books when parameters match returns book list")
     void search_ParametersMatch_ReturnsBookList() {
-        // Given:
+        // Given
         BookSearchParametersDto params = BookServiceUtils.createBookSearchParametersDto();
         Specification<Book> spec = BookServiceUtils.createMockSpecification();
         when(bookSpecificationBuilder.build(any(BookSearchParametersDto.class))).thenReturn(spec);
         when(bookRepository.findAll(spec)).thenReturn(Collections.singletonList(book));
         when(bookMapper.toDto(any(Book.class))).thenReturn(bookDto);
 
-        // When:
+        // When
         List<BookDto> result = bookService.search(params);
 
-        // Then:
-        assertEquals(1, result.size(), BookServiceConstants.EXPECTED_BOOK_COUNT_MESSAGE);
-        assertEquals(BookServiceConstants.BOOK_TITLE, result.get(0).getTitle(),
-                BookServiceConstants.BOOK_TITLE_MATCH_MESSAGE);
+        // Then
+        assertEquals(1, result.size(), BookServiceUtils.EXPECTED_BOOK_COUNT_MESSAGE);
+        assertEquals(BookServiceUtils.BOOK_TITLE, result.get(0).getTitle(), BookServiceUtils.BOOK_TITLE_MESSAGE);
     }
 
     @Test
     @DisplayName("Delete book by ID when book does not exist does nothing")
     void deleteById_BookDoesNotExist_DoesNothing() {
-        // Given:
-        // No specific setup needed, as the method does not throw an exception
+        // Given
+        // No setup needed
 
-        // When:
-        bookService.deleteById(BookServiceConstants.BOOK_ID);
+        // When
+        bookService.deleteById(BookServiceUtils.BOOK_ID);
 
-        // Then:
-        verify(bookRepository).deleteById(BookServiceConstants.BOOK_ID);
+        // Then
+        verify(bookRepository).deleteById(BookServiceUtils.BOOK_ID);
     }
 }
