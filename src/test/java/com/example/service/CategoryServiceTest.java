@@ -130,8 +130,6 @@ class CategoryServiceTest {
     @Test
     @DisplayName("Delete category by ID when category exists deletes category")
     void deleteById_CategoryExists_DeletesCategory() {
-        // Given
-        // No setup required
 
         // When
         categoryService.deleteById(CategoryServiceUtils.CATEGORY_ID);

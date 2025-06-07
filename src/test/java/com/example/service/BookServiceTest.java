@@ -142,9 +142,6 @@ class BookServiceTest {
     @Test
     @DisplayName("Delete book by ID when book does not exist does nothing")
     void deleteById_BookDoesNotExist_DoesNothing() {
-        // Given
-        // No setup needed
-
         // When
         bookService.deleteById(BookServiceUtils.BOOK_ID);
 

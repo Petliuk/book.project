@@ -1,133 +1,96 @@
 package com.example.controller;
 
 import com.example.dto.book.BookDto;
-import com.example.dto.book.BookSearchParametersDto;
 import com.example.dto.book.CreateBookRequestDto;
 import com.example.exception.EntityNotFoundException;
-import com.example.service.BookService;
 import com.example.utils.BookControllerUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BookControllerTest {
-    private MockMvc mockMvc;
+    protected static MockMvc mockMvc;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
-    @Mock
-    private BookService bookService;
-
-    @InjectMocks
-    private BookController bookController;
-
-    @ControllerAdvice
-    static class TestExceptionHandler {
-        @ExceptionHandler(EntityNotFoundException.class)
-        public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
-            return ResponseEntity.status(404).body(ex.getMessage());
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-        PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
-        pageableResolver.setFallbackPageable(PageRequest.of(0, 10));
+    @BeforeAll
+    static void beforeAll(@Autowired WebApplicationContext applicationContext) {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(bookController)
-                .setCustomArgumentResolvers(pageableResolver)
-                .setControllerAdvice(new TestExceptionHandler())
+                .webAppContextSetup(applicationContext)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = "user", authorities = "USER")
     @DisplayName("Get all books when books exist")
+    @Sql(scripts = BookControllerUtils.ADD_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.REMOVE_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getAll_BooksExist_Success() throws Exception {
-        // Given
-        BookDto book1 = BookControllerUtils.createBookDto(1L);
-        BookDto book2 = BookControllerUtils.createBookDto(2L);
-        List<BookDto> books = List.of(book1, book2);
-        Page<BookDto> page = BookControllerUtils.createBookPage(books);
-        when(bookService.getAll(any(Pageable.class))).thenReturn(page);
-
         // When
         MvcResult result = mockMvc.perform(
                         get(BookControllerUtils.BOOKS_URL)
-                                .param("page", "0")
-                                .param("size", "10"))
+                                .param("page", BookControllerUtils.PAGE_NUMBER)
+                                .param("size", BookControllerUtils.PAGE_SIZE))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+        assertEquals(BookControllerUtils.HTTP_OK_STATUS, result.getResponse().getStatus());
 
         // Then
         List<BookDto> actual = BookControllerUtils.parsePagedBookResponse(result, objectMapper);
-        assertEquals(2, actual.size());
-        assertThat(actual.get(0).getTitle(), equalTo("The Hobbit"));
+        assertEquals(BookControllerUtils.EXPECTED_BOOK_LIST_SIZE, actual.size());
+        assertThat(actual.get(0).getTitle(), equalTo("Test Book 1"));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = "user", authorities = "USER")
     @DisplayName("Get book by valid ID")
+    @Sql(scripts = BookControllerUtils.ADD_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.REMOVE_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getBookById_ValidId_Success() throws Exception {
-        // Given
-        BookDto expected = BookControllerUtils.createBookDto(1L);
-        when(bookService.getBookById(1L)).thenReturn(expected);
-
         // When
         MvcResult result = mockMvc.perform(
-                        get(BookControllerUtils.BOOKS_URL + "/{id}", 1L))
+                        get(BookControllerUtils.BOOKS_URL + "/{id}", BookControllerUtils.FIRST_BOOK_ID))
                 .andExpect(status().isOk())
                 .andReturn();
 
         // Then
         BookDto actual = BookControllerUtils.parseResponse(result, BookDto.class, objectMapper);
-        assertThat(actual.getTitle(), equalTo("The Hobbit"));
-        assertThat(actual.getAuthor(), equalTo("J.R.R. Tolkien"));
+        assertThat(actual.getTitle(), equalTo("Test Book 1"));
+        assertThat(actual.getAuthor(), equalTo("Test Author 1"));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = "user", authorities = "USER")
     @DisplayName("Get book by invalid ID")
+    @Sql(scripts = BookControllerUtils.REMOVE_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.REMOVE_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getBookById_InvalidId_Fail() throws Exception {
-        // Given
-        when(bookService.getBookById(BookControllerUtils.INVALID_ID))
-                .thenThrow(new EntityNotFoundException(BookControllerUtils.BOOK_NOT_FOUND_MESSAGE));
-
         // When
         MvcResult result = mockMvc.perform(
                         get(BookControllerUtils.BOOKS_URL + "/{id}", BookControllerUtils.INVALID_ID))
@@ -136,21 +99,18 @@ public class BookControllerTest {
 
         // Then
         assertTrue(result.getResolvedException() instanceof EntityNotFoundException);
-        assertThat(result.getResolvedException().getMessage(), equalTo(BookControllerUtils.BOOK_NOT_FOUND_MESSAGE));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = "user", authorities = "USER")
     @DisplayName("Search books with valid parameters")
+    @Sql(scripts = BookControllerUtils.ADD_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.REMOVE_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void searchBooks_ValidParameters_Success() throws Exception {
-        // Given
-        BookDto expected = BookControllerUtils.createBookDto(1L);
-        when(bookService.search(any(BookSearchParametersDto.class))).thenReturn(List.of(expected));
-
         // When
         MvcResult result = mockMvc.perform(
                         get(BookControllerUtils.SEARCH_URL)
-                                .param("title", "The Hobbit"))
+                                .param("title", "Test Book 1"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -158,70 +118,74 @@ public class BookControllerTest {
         List<BookDto> actual = BookControllerUtils.parseResponse(
                 result, new TypeReference<>() {
                 }, objectMapper);
-        assertThat(actual, hasSize(1));
-        assertThat(actual.get(0).getTitle(), equalTo("The Hobbit"));
+        assertThat(actual, hasSize(BookControllerUtils.EXPECTED_SINGLE_ITEM_SIZE));
+        assertThat(actual.get(0).getTitle(), equalTo("Test Book 1"));
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = "admin", authorities = "ADMIN")
     @DisplayName("Create book with valid request")
+    @Sql(scripts = BookControllerUtils.CLEAR_BOOKS_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.ADD_CATEGORY_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.CLEAR_BOOKS_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void createBook_ValidRequest_Success() throws Exception {
         // Given
         CreateBookRequestDto request = BookControllerUtils.createBookRequestDto();
-        BookDto expected = BookControllerUtils.createBookDto(1L);
-        when(bookService.createBook(any(CreateBookRequestDto.class))).thenReturn(expected);
+        String jsonRequest = objectMapper.writeValueAsString(request);
 
         // When
         MvcResult result = mockMvc.perform(
                         post(BookControllerUtils.BOOKS_URL)
-                                .content(objectMapper.writeValueAsString(request))
+                                .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andReturn();
 
         // Then
         BookDto actual = BookControllerUtils.parseResponse(result, BookDto.class, objectMapper);
-        assertThat(actual.getTitle(), equalTo("The Hobbit"));
-        assertThat(actual.getAuthor(), equalTo("J.R.R. Tolkien"));
+        assertThat(actual.getTitle(), equalTo("New Book"));
+        assertThat(actual.getAuthor(), equalTo("New Author"));
+        assertThat(actual.getIsbn(), equalTo("9789876543210"));
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = "admin", authorities = "ADMIN")
     @DisplayName("Update book with valid ID")
+    @Sql(scripts = BookControllerUtils.ADD_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.REMOVE_TEST_CATEGORIES_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateBook_ValidId_Success() throws Exception {
         // Given
         CreateBookRequestDto request = BookControllerUtils.createUpdatedBookRequestDto();
-        BookDto expected = BookControllerUtils.createUpdatedBookDto(1L);
-        when(bookService.updateBook(eq(1L), any(CreateBookRequestDto.class))).thenReturn(expected);
+        String jsonRequest = objectMapper.writeValueAsString(request);
 
         // When
         MvcResult result = mockMvc.perform(
-                        put(BookControllerUtils.BOOKS_URL + "/{id}", 1L)
-                                .content(objectMapper.writeValueAsString(request))
+                        put(BookControllerUtils.BOOKS_URL + "/{id}", BookControllerUtils.FIRST_BOOK_ID)
+                                .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         // Then
         BookDto actual = BookControllerUtils.parseResponse(result, BookDto.class, objectMapper);
-        assertThat(actual.getTitle(), equalTo("The Fellowship of the Ring"));
-        assertThat(actual.getAuthor(), equalTo("J.R.R. Tolkien"));
+        assertThat(actual.getTitle(), equalTo("Test Book 2"));
+        assertThat(actual.getAuthor(), equalTo("Test Author 2"));
+        assertThat(actual.getIsbn(), equalTo("9999999999"));
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = "admin", authorities = "ADMIN")
     @DisplayName("Delete book with valid ID")
+    @Sql(scripts = BookControllerUtils.CLEAR_BOOKS_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.ADD_TEST_BOOKS_SCRIPT, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = BookControllerUtils.CLEAR_BOOKS_SCRIPT, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteBook_ValidId_Success() throws Exception {
-        // Given
-        when(bookService.getBookById(1L))
-                .thenThrow(new EntityNotFoundException(BookControllerUtils.BOOK_NOT_FOUND_MESSAGE));
-
         // When
-        mockMvc.perform(delete(BookControllerUtils.BOOKS_URL + "/{id}", 1L))
+        mockMvc.perform(delete(BookControllerUtils.BOOKS_URL + "/{id}", BookControllerUtils.FIRST_BOOK_ID))
                 .andExpect(status().isNoContent());
 
         // Then
-        MvcResult result = mockMvc.perform(get(BookControllerUtils.BOOKS_URL + "/{id}", 1L))
+        MvcResult result = mockMvc.perform(get(BookControllerUtils.BOOKS_URL + "/{id}", BookControllerUtils.FIRST_BOOK_ID))
                 .andExpect(status().isNotFound())
                 .andReturn();
         assertTrue(result.getResolvedException() instanceof EntityNotFoundException);

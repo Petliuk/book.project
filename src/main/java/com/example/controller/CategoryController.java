@@ -39,7 +39,7 @@ public class CategoryController {
         return categoryService.findAll(pageable);
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "Get category by ID",
             description = "Retrieve details of a category by its ID")
     @GetMapping("/{id}")

@@ -13,7 +13,6 @@ public final class CategoryRepositoryUtils {
     public static final String SCIENCE_DESCRIPTION = "Science books";
     public static final String ADD_TEST_CATEGORIES_SQL = "classpath:database/categories/add-test-categories.sql";
     public static final String REMOVE_TEST_CATEGORIES_SQL = "classpath:database/categories/remove-test-categories.sql";
-    public static final String EXPECTED_CATEGORY_COUNT_MESSAGE = "Expected %d categories";
     public static final String CATEGORY_NAME_MESSAGE = "Category name doesn't match";
     public static final String CATEGORY_EXISTS_MESSAGE = "Category should exist";
     public static final String CATEGORY_NOT_EXISTS_MESSAGE = "Category should be deleted";
