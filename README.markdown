@@ -14,9 +14,6 @@ This project was built to make it easy to browse, find, and buy books online, wh
 - [📡 Controller Functionalities](#controller-functionalities)
 - [🚀 Setup Instructions](#setup-instructions)
 - [🧪 Test the API](#test-the-api)
-- [🧠 Challenges and Solutions](#challenges-and-solutions)
-- [🤝 Contributing](#contributing)
-- [📜 License](#license)
 
 ---
 
