@@ -1,94 +1,201 @@
-# Online Bookstore
+# 📚 Online Bookstore
 
-Welcome to the **Online Bookstore**, a robust and secure web application designed to manage a virtual bookstore. This project was inspired by the need to create a user-friendly platform for book enthusiasts to browse, search, and purchase books while providing administrators with tools to manage inventory and orders efficiently. Built with modern Java technologies, this application showcases a full-stack solution for e-commerce needs.
+Welcome to the  **Online Bookstore** — a simple and secure web app made for anyone who loves books.
+This project was built to make it easy to browse, find, and buy books online, while giving admins the tools they need to manage everything smoothly — from updating inventory to tracking orders. It's designed to be helpful, reliable, and user-friendly for both readers and store managers.
 
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Technologies Used](#technologies-used)
-- [Features](#features)
-- [Database Schema](#database-schema)
-- [Controller Functionalities](#controller-functionalities)
-- [Setup Instructions](#setup-instructions)
-- [Postman Collection](#postman-collection)
-- [Demo Video](#demo-video)
-- [Challenges and Solutions](#challenges-and-solutions)
-- [Contributing](#contributing)
+---
 
-## Project Overview
-The Online Bookstore is a RESTful API that facilitates book browsing, user authentication, shopping cart management, and order processing. It solves the problem of providing a scalable and secure platform for users to explore books by categories, add them to a cart, and place orders, while administrators can manage books, categories, and order statuses. The application emphasizes clean code, security, and a seamless user experience.
+## 📑 Table of Contents
 
-## Technologies Used
-- **Spring Boot**: Framework for building the application with minimal configuration.
-- **Spring Security**: Implements JWT-based authentication and role-based access control (USER and ADMIN roles).
-- **Spring Data JPA**: Simplifies database operations with Hibernate as the ORM.
-- **MySQL/H2 Database**: MySQL for production and H2 for testing.
-- **Swagger (OpenAPI)**: Provides API documentation and testing via a user-friendly UI.
-- **Liquibase**: Manages database schema migrations.
-- **MapStruct**: Automates mapping between DTOs and entities.
-- **Lombok**: Reduces boilerplate code for models and services.
-- **Maven**: Dependency management and build tool.
-- **JJWT**: Handles JSON Web Token generation and validation.
-- **JUnit & Mockito**: For unit and integration testing.
-- **JaCoCo**: Generates code coverage reports.
-- **Checkstyle**: Enforces coding standards.
+- [🧾 Project Overview](#project-overview)
+- [🛠️ Technologies Used](#technologies-used)
+- [✨ Features](#features)
+- [🧩 Database Schema](#database-schema)
+- [📡 Controller Functionalities](#controller-functionalities)
+- [🚀 Setup Instructions](#setup-instructions)
+- [🧪 Test the API](#test-the-api)
+- [🧠 Challenges and Solutions](#challenges-and-solutions)
+- [🤝 Contributing](#contributing)
+- [📜 License](#license)
 
-## Features
-- **User Authentication**: Secure registration and login with JWT.
-- **Book Management**: CRUD operations for books (admin-only for create, update, delete).
-- **Category Management**: Organize books by categories with CRUD operations (admin-only for create, update, delete).
-- **Shopping Cart**: Add, update, and remove books from the cart.
-- **Order Management**: Place orders, view order history, and update order statuses (admin-only).
-- **Search Functionality**: Search books by title or author.
-- **Pagination**: Efficient data retrieval for books, categories, and orders.
-- **Soft Delete**: Ensures data integrity by marking records as deleted instead of physical deletion.
+---
 
-## Database Schema
-The database schema for the Online Bookstore is designed to support the application's functionality. Below is a visual representation:
+## 🧾 Project Overview
 
+The **Online Bookstore** is a RESTful API backend application that provides a secure and scalable solution for:
 
-### Schema Description
-- **users**: Stores user details (email, password, name, etc.) with a many-to-many relationship to roles.
-- **roles**: Defines user roles (USER, ADMIN).
-- **books**: Contains book information (title, author, ISBN, price, etc.) with a many-to-many relationship to categories.
-- **categories**: Manages book categories with a soft delete feature.
-- **shopping_carts**: Links to users and contains cart items.
-- **cart_items**: Represents items in a shopping cart with quantity.
-- **orders**: Stores order details with a one-to-many relationship to order items.
-- **order_items**: Details individual items within an order.
-- **users_roles** and **books_categories**: Junction tables for many-to-many relationships.
+- 📖 Browsing and searching books by title, author, or category
+- 🛒 Managing shopping carts and placing orders
+- 🔐 Authenticating users and authorizing roles (USER & ADMIN)
+- 🧰 Administering inventory, categories, and order statuses
 
-## Controller Functionalities
-The application includes five main controllers, each handling specific functionalities:
+---
 
-### AuthController
-- **POST /api/auth/registration**: Registers a new user and assigns the USER role.
-- **POST /api/auth/login**: Authenticates a user and returns a JWT token.
+## 🛠️ Technologies Used
 
-### BookController
-- **GET /api/books**: Retrieves a paginated list of all books (USER role).
-- **GET /api/books/{id}**: Fetches a book by ID (USER role).
-- **GET /api/books/search**: Searches books by title or author (USER role).
-- **POST /api/books**: Creates a new book (ADMIN role).
-- **PUT /api/books/{id}**: Updates an existing book (ADMIN role).
-- **DELETE /api/books/{id}**: Deletes a book by ID (ADMIN role).
+| Technology | Description |
+|-----------|-------------|
+| ☕ Java 21 | Main programming language |
+| 🚀 Spring Boot 3.4.0 | Core framework for rapid development |
+| 🔐 Spring Security | JWT-based authentication and role-based access |
+| 🗄️ Spring Data JPA | ORM with Hibernate |
+| 🐬 MySQL / H2 | MySQL (prod), H2 (test) |
+| 🌐 Swagger (OpenAPI) | API documentation and UI |
+| 🧱 Liquibase | Database schema migrations |
+| 🔄 MapStruct | DTO to entity mapping |
+| 🧹 Lombok | Reduces boilerplate |
+| ⚙️ Maven | Dependency and build management |
+| 🔑 JJWT 0.11.5 | JWT handling |
+| 🧪 JUnit & Mockito | Unit & integration testing |
+| 📊 JaCoCo | Code coverage |
+| 🧼 Checkstyle | Code style checks |
+| ✅ Validation API | Data validation annotations |
 
-### CategoryController
-- **GET /api/categories**: Retrieves a paginated list of all categories (USER role).
-- **GET /api/categories/{id}**: Fetches a category by ID (USER role).
-- **GET /api/categories/{id}/books**: Lists books by category ID (USER role).
-- **POST /api/categories**: Creates a new category (ADMIN role).
-- **PUT /api/categories/{id}**: Updates an existing category (ADMIN role).
-- **DELETE /api/categories/{id}**: Deletes a category by ID (ADMIN role).
+---
 
-### OrderController
-- **POST /api/orders**: Places an order from the user's shopping cart (USER role).
-- **GET /api/orders**: Retrieves the user's order history (USER role).
-- **PATCH /api/orders/{id}**: Updates an order's status (ADMIN role).
-- **GET /api/orders/{orderId}/items**: Lists all items in an order (USER role).
-- **GET /api/orders/{orderId}/{itemId}**: Retrieves a specific order item (USER role).
+## ✨ Features
 
-### ShoppingCartController
-- **GET /api/cart**: Retrieves the user's shopping cart details (USER role).
-- **POST /api/cart**: Adds a book to the shopping cart (USER role).
-- **PUT /api/cart/cart-items/{cartItemId}**: Updates the quantity of a cart item (USER role).
-- **DELETE /api/cart/cart-items/{cartItemId}**: Removes an item from the cart (USER role).
+- 🔐 **JWT Authentication** — Secure user registration and login
+- 📘 **Book Management** — CRUD operations (admin only)
+- 🏷️ **Category Management** — Create and organize book categories
+- 🛒 **Shopping Cart** — Add/update/remove books from cart
+- 📦 **Order Management** — Place/view orders and update status
+- 🔍 **Search Books** — By title or author
+- 📄 **Pagination** — On books, categories, and orders
+- 🧽 **Soft Delete** — Logical deletion of records
+
+---
+
+## 🧩 Database Schema
+
+![Database Schema](books.png)
+
+### Entities Overview
+
+- **users** ↔ **roles** — many-to-many via `users_roles`
+- **books** ↔ **categories** — many-to-many via `books_categories`
+- **shopping_carts** — one-to-one with users
+- **cart_items** — one-to-many with shopping carts
+- **orders** — one-to-many with order items
+- **order_items** — contains book reference and quantity
+
+---
+
+## 📡 Controller Functionalities
+
+### 🔑 AuthController
+- `POST /api/auth/registration` — Register a new user
+- `POST /api/auth/login` — Authenticate user and obtain JWT token
+
+### 📘 BookController
+- `GET /api/books` — Get a paginated list of all books
+- `GET /api/books/{id}` — Get details of a book by ID
+- `GET /api/books/search` — Search books by title or author
+- `POST /api/books` — Create a new book (Admin only)
+- `PUT /api/books/{id}` — Update a book (Admin only)
+- `DELETE /api/books/{id}` — Delete a book (Admin only)
+
+### 🏷️ CategoryController
+- `GET /api/categories` — Get a paginated list of categories
+- `GET /api/categories/{id}` — Get category details by ID
+- `GET /api/categories/{id}/books` — List books in a category
+- `POST /api/categories` — Create a new category (Admin only)
+- `PUT /api/categories/{id}` — Update a category (Admin only)
+- `DELETE /api/categories/{id}` — Delete a category (Admin only)
+
+### 📦 OrderController
+- `POST /api/orders` — Place an order from the shopping cart
+- `GET /api/orders` — View order history
+- `PATCH /api/orders/{id}` — Update order status (Admin only)
+- `GET /api/orders/{orderId}/items` — List all items in an order
+- `GET /api/orders/{orderId}/{itemId}` — Get specific order item details
+
+### 🛒 ShoppingCartController
+- `GET /api/cart` — Get current shopping cart details
+- `POST /api/cart` — Add a book to the cart
+- `PUT /api/cart/cart-items/{cartItemId}` — Update quantity of a cart item
+- `DELETE /api/cart/cart-items/{cartItemId}` — Remove an item from the cart
+
+---
+
+## 🚀 Setup Instructions
+
+### ✅ Prerequisites
+
+- Java 21
+- Maven 3.8+
+- MySQL (for production) or H2 (for testing)
+- Postman (optional)
+
+### 📥 Clone the Repository
+
+```bash
+git clone <https://github.com/Petliuk/book.project.git>
+```
+
+### ⚙️ Configure the Database
+
+#### For MySQL:
+
+Edit `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/db?serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=root
+```
+
+#### For H2:
+
+Use default in-memory settings (no changes needed).
+
+### ▶️ Build and Run
+
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+
+---
+
+## 🧪 Test the API
+
+### 📡 API Access
+
+- API Endpoint: `http://localhost:8080/api`
+- Swagger UI: `http://localhost:8080/api/swagger-ui/index.html`
+
+### 🧪 Sample Requests
+
+#### ✅ Register a new user
+
+```http
+POST /api/auth/registration
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "repeatPassword": "password123",
+  "firstName": "user",
+  "lastName": "user"
+}
+```
+
+#### 🔐 Login to receive JWT
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+Use the returned token as:
+
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
