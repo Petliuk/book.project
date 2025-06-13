@@ -5,19 +5,20 @@ This project was built to make it easy to browse, find, and buy books online, wh
 
 ---
 
-## 📑 Table of Contents
+## 🔎 What’s Inside
 
-- [ Project Overview](#project-overview)
-- [🛠️ Technologies Used](#technologies-used)
-- [✨ Features](#features)
-- [🧩 Database Schema](#database-schema)
-- [📡 Controller Functionalities](#controller-functionalities)
-- [🚀 Setup Instructions](#setup-instructions)
-- [🧪 Test the API](#test-the-api)
+This documentation includes:
+- a high-level overview of the project
+- key technologies and libraries used
+- main features and API capabilities
+- a visual database schema and entity relationships
+- detailed controller functionalities with endpoints
+- setup and configuration instructions
+- how to run and test the API locally
 
 ---
 
-## Project Overview {#project-overview}
+## Project Overview
 
 The **Online Bookstore** is a RESTful API backend application that provides a secure and scalable solution for:
 - 📖 Browsing and searching books by title, author, or category
@@ -27,7 +28,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## Technologies Used {#technologies-used}
+## Technologies Used
 
 | Technology | Description |
 |-----------|-------------|
@@ -49,7 +50,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## Features {#features}
+## Features
 
 - 🔐 **JWT Authentication** — Secure user registration and login
 - 📘 **Book Management** — CRUD operations (admin only)
@@ -62,7 +63,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## Database Schema {#database-schema}
+## Database Schema
 
 ![Database Schema](diagram.png)
 
@@ -77,7 +78,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## Controller Functionalities {#controller-functionalities}
+## Controller Functionalities
 
 ### 🔑 AuthController
 - `POST /api/auth/registration` — Register a new user
@@ -114,7 +115,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## Setup Instructions {#setup-instructions}
+## Setup Instructions
 
 ### ✅ Prerequisites
 
