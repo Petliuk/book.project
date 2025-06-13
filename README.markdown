@@ -7,7 +7,7 @@ This project was built to make it easy to browse, find, and buy books online, wh
 
 ## 📑 Table of Contents
 
-- [🧾 Project Overview](#project-overview)
+- [ Project Overview](#project-overview)
 - [🛠️ Technologies Used](#technologies-used)
 - [✨ Features](#features)
 - [🧩 Database Schema](#database-schema)
@@ -17,10 +17,9 @@ This project was built to make it easy to browse, find, and buy books online, wh
 
 ---
 
-## 🧾 Project Overview
+## Project Overview {#project-overview}
 
 The **Online Bookstore** is a RESTful API backend application that provides a secure and scalable solution for:
-
 - 📖 Browsing and searching books by title, author, or category
 - 🛒 Managing shopping carts and placing orders
 - 🔐 Authenticating users and authorizing roles (USER & ADMIN)
@@ -28,7 +27,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used {#technologies-used}
 
 | Technology | Description |
 |-----------|-------------|
@@ -50,7 +49,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## ✨ Features
+## Features {#features}
 
 - 🔐 **JWT Authentication** — Secure user registration and login
 - 📘 **Book Management** — CRUD operations (admin only)
@@ -63,9 +62,9 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## 🧩 Database Schema
+## Database Schema {#database-schema}
 
-![Database Schema](books.png)
+![Database Schema](diagram.png)
 
 ### Entities Overview
 
@@ -78,7 +77,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## 📡 Controller Functionalities
+## Controller Functionalities {#controller-functionalities}
 
 ### 🔑 AuthController
 - `POST /api/auth/registration` — Register a new user
@@ -115,7 +114,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions {#setup-instructions}
 
 ### ✅ Prerequisites
 
