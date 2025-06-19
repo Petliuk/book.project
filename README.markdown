@@ -47,6 +47,7 @@ The **Online Bookstore** is a RESTful API backend application that provides a se
 | 📊 JaCoCo | Code coverage |
 | 🧼 Checkstyle | Code style checks |
 | ✅ Validation API | Data validation annotations |
+| 🐳 Docker | Containerization and deployment |
 
 ---
 
@@ -152,15 +153,61 @@ Use default in-memory settings (no changes needed).
 mvn clean install
 mvn spring-boot:run
 ```
-
 ---
 
+## 🐳 Running with Docker
+
+1. Copy `.env.template` to `.env` and update variables:
+   Example `.env`:
+   ```env
+   MYSQLDB_ROOT_PASSWORD=your_root_password
+   MYSQLDB_USERNAME=your_username
+   MYSQLDB_DATABASE=your_database_name
+   MYSQLDB_LOCAL_PORT=3307
+   MYSQLDB_DOCKER_PORT=3306
+   APP_LOCAL_PORT=8081
+   APP_DOCKER_PORT=8080
+   SERVER_CONTEXT_PATH=/api
+   SPRING_PROFILES_ACTIVE=prod
+   ```
+2. Build and start containers:
+   ```bash
+   docker-compose up --build
+   ```
+   For detached mode:
+   ```bash
+   docker-compose up -d --build
+   ```
+3. Access services:
+    - **Application**: `http://localhost:8081/api`
+    - **Swagger UI**: `http://localhost:8081/api/swagger-ui/index.html`
+    - **MySQL**:
+        - Host: `localhost`
+        - Port: `3307`
+        - User: `your_username`
+        - Password: `your_root_password`
+        - Database: `your_database_name`
+
+4. Stop containers:
+   ```bash
+   docker-compose down
+   ```
+### 🔌 Essential Docker Commands
+| Command | Description |
+| --- | --- |
+| `docker-compose up --build` | Build and start containers |
+| `docker-compose down` | Stop and remove containers |
+| `docker-compose logs -f app` | View app logs |
+| `docker-compose ps` | Check container status |
+
+### ℹ️ Notes
+- First run may take 3-5 minutes due to image downloads and database initialization (via Liquibase).
+---
 ## 🧪 Test the API
 
 ### 📡 API Access
-
-- API Endpoint: `http://localhost:8080/api`
-- Swagger UI: `http://localhost:8080/api/swagger-ui/index.html`
+- **Endpoint**: `http://localhost:8081/api` (Docker) or `http://localhost:8080/api` (local)
+- **Swagger UI**: `http://localhost:8081/api/swagger-ui/index.html` (Docker) or `http://localhost:8080/api/swagger-ui/index.html` (local)
 
 ### 🧪 Sample Requests
 
@@ -196,3 +243,20 @@ Use the returned token as:
 ```http
 Authorization: Bearer <JWT_TOKEN>
 ```
+### 📸 Swagger UI Screenshots
+Below are screenshots of the Swagger UI showcasing key API endpoints:
+
+#### Authentication APIs
+![Auth Screenshot](auth_screenshot.png)
+
+#### Book Management APIs
+![Book Screenshot](book_screenshot.png)
+
+#### Category Management APIs
+![Category Screenshot](category_screenshot.png)
+
+#### Order Management APIs
+![Order Screenshot](order_screenshot.png)
+
+#### Shopping Cart APIs
+![Cart Screenshot](cart_screenshot.png)
